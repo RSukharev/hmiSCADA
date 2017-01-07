@@ -1,0 +1,2 @@
+# hmiSCADA
+Qt graph visualiser
