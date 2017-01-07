@@ -17,7 +17,7 @@
 #include <QCursor>
 #include <QGraphicsSimpleTextItem>
 
-#include "Logger/ConsoleAppender.h"
+#include "../Logger/ConsoleAppender.h"
 
 /*!
     \brief Класс Node - обертка класса QGraphicsObject, визуализация объекта узла графа

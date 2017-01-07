@@ -19,7 +19,7 @@
 #include "plugins/interfaces/imodel.h"
 #include "producer.h"
 
-#include "Logger/ConsoleAppender.h"
+#include "../Logger/ConsoleAppender.h"
 
 /*!
     \brief Класс контроллер

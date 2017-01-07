@@ -4,7 +4,7 @@
 #include "../interfaces/inode.h"
 #include "../../data.h"
 
-#include "../../Logger/ConsoleAppender.h"
+#include "../../../Logger/ConsoleAppender.h"
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
     Q_EXPORT_PLUGIN2( IPlugin, PluginUdp )

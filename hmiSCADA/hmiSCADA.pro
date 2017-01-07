@@ -20,12 +20,12 @@ HEADERS += \
     plugins/interfaces/iobject.h \
     plugins/interfaces/iplugin.h \
     plugins/networkproperties.h \
-    Logger/AbstractAppender.h \
-    Logger/AbstractStringAppender.h \
-    Logger/ConsoleAppender.h \
-    Logger/FileAppender.h \
-    Logger/Logger.h \
-    Logger/OutputDebugAppender.h \
+    ../Logger/AbstractAppender.h \
+    ../Logger/AbstractStringAppender.h \
+    ../Logger/ConsoleAppender.h \
+    ../Logger/FileAppender.h \
+    ../Logger/Logger.h \
+    ../Logger/OutputDebugAppender.h \
     plugins/request.h \
     scene/mainwidget.h \
     scene/figures/arc.h \
@@ -34,7 +34,8 @@ HEADERS += \
     objectmap.h \
     producer.h \
     streamstring.h \
-    scene/pixmapholder.h
+    scene/pixmapholder.h \
+    plugins/interfaces/imodel.h
 
 TEMPLATE = app
 
@@ -44,16 +45,18 @@ SOURCES += main.cpp \
     controller.cpp \
     visualiser.cpp \
     scene/figures/node.cpp \
-    Logger/AbstractAppender.cpp \
-    Logger/AbstractStringAppender.cpp \
-    Logger/ConsoleAppender.cpp \
-    Logger/FileAppender.cpp \
-    Logger/Logger.cpp \
+    ../Logger/AbstractAppender.cpp \
+    ../Logger/AbstractStringAppender.cpp \
+    ../Logger/ConsoleAppender.cpp \
+    ../Logger/FileAppender.cpp \
+    ../Logger/Logger.cpp \
     scene/mainwidget.cpp \
     scene/figures/arc.cpp
 
 FORMS += \
     mainwidget.ui
+
+DESTDIR = $$OUT_PWD/../bin
 
 DISTFILES +=
 

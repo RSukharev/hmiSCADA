@@ -3,7 +3,7 @@
 
 #include "node.h"
 
-#include "Logger/ConsoleAppender.h"
+#include "../Logger/ConsoleAppender.h"
 
 #include <QGraphicsPathItem>
 

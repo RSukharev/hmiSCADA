@@ -14,7 +14,7 @@
 #include <QPainter>
 #include <QDir>
 
-#include "Logger/ConsoleAppender.h"
+#include "../Logger/ConsoleAppender.h"
 #include "resourcepath.h"
 
 /*!

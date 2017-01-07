@@ -3,7 +3,7 @@
 
 #include "controller.h"
 
-#include "Logger/ConsoleAppender.h"
+#include "../Logger/ConsoleAppender.h"
 
 int main(int argc, char *argv[])
 {

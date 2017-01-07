@@ -2,18 +2,18 @@
 #include <QDataStream>
 #include "udpreceiver.h"
 
-#include "../../../Logger/ConsoleAppender.h"
+#include "../Logger/ConsoleAppender.h"
 
 UdpReceiver::UdpReceiver(QObject * parent) :
-    QObject(parent), m_port(0)
+    QObject(parent)
 { }
 
 UdpReceiver::~UdpReceiver() {
 
-    foreach(UdpSocket * socket, m_udpSocketList)
+    foreach(UdpSocket * socket, udpSocketList)
         if(socket) socket->deleteLater();
 
-    foreach(QThread * thread, m_threadList)
+    foreach(QThread * thread, threadList)
         if(thread)
             thread->deleteLater();
 }
@@ -22,14 +22,16 @@ quint16 UdpReceiver::listen(const QString &address, quint16 initPort)
 {
     UdpSocket * udpSocket = new UdpSocket(address, initPort);
 
+    quint16 port = 0;
+
     if(udpSocket && udpSocket->getPort() < 10000)
     {
-        m_port = udpSocket->getPort();
+        port = udpSocket->getPort();
 
         connect(udpSocket, SIGNAL(received(QByteArray)),
                                     this, SLOT(parseReceived(QByteArray)));
 
-        m_udpSocketList.append(udpSocket);
+        udpSocketList.append(udpSocket);
 
         QThread * thread = new QThread;
 
@@ -38,7 +40,7 @@ quint16 UdpReceiver::listen(const QString &address, quint16 initPort)
             udpSocket->moveToThread(thread);
             thread->start();
 
-            m_threadList.append(thread);
+            threadList.append(thread);
         }
     }
     else {
@@ -46,10 +48,8 @@ quint16 UdpReceiver::listen(const QString &address, quint16 initPort)
         exit(1);
     }
 
-    return m_port;
+    return port;
 }
-
-quint16 UdpReceiver::getPort() const { return m_port; }
 
 void UdpReceiver::parseReceived(QByteArray receivedData) {
 

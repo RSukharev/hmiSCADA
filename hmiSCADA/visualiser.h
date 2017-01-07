@@ -17,7 +17,7 @@
 #include "scene/guiproperties.h"
 #include "scene/mainwidget.h"
 
-#include "Logger/ConsoleAppender.h"
+#include "../Logger/ConsoleAppender.h"
 
 #include "objectmap.h"
 

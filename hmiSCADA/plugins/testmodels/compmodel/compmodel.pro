@@ -9,3 +9,5 @@ HEADERS += compmodel.h \
     ../../interfaces/iplugin.h \
     ../../interfaces/iobject.h \
     ../../interfaces/imodel.h
+
+DESTDIR = $$OUT_PWD/../../../../bin/plugins

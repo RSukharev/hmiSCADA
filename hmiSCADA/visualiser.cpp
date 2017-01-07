@@ -175,7 +175,7 @@ void Visualiser::setNodesPosition() {
 
     //qDebug() << "place nodes";
 
-    QList<Node *> & parentNodes = rootNodes.getValues();
+    QList<Node *> parentNodes(rootNodes.getValues());
     int parentsCount = parentNodes.size();
 
     emit setNodesCount(parentsCount);

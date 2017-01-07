@@ -2,7 +2,7 @@
 #include <QtNetwork/QHostAddress>
 #include <QDataStream>
 
-#include "../../../Logger/ConsoleAppender.h"
+#include "../Logger/ConsoleAppender.h"
 
 UdpSender::UdpSender(const QString & ip, quint16 _port, QObject * _parent) :
     QObject(_parent),
