@@ -1,0 +1,126 @@
+#include <QtGui>
+
+ #include "arc.h"
+ #include <math.h>
+
+#include <QGraphicsScene>
+
+ const qreal Pi = 3.14;
+
+ Arc::Arc(QGraphicsItem *startItem, QGraphicsItem *endItem,
+          QGraphicsItem *parent)
+     : QGraphicsLineItem(parent),
+       ArcSize(16),
+       dashOffset(0)
+ {
+     QGraphicsScene * scene = startItem->scene();
+     scene->addItem(this);
+
+     mStartItem = startItem;
+     myEndItem = endItem;
+     setFlag(QGraphicsItem::ItemIsSelectable, false);
+     myColor = Qt::gray;
+     mPen = QPen(myColor, 1, Qt::SolidLine);
+ }
+
+ QRectF Arc::boundingRect() const
+ {
+     qreal extra = (pen().width() + ArcSize + 4) / 2.0;
+
+     QLineF Arc(line());
+     QPointF p1(Arc.p1());
+     QPointF p2(Arc.p2());
+
+
+     if(p1 == p2) {
+
+         qreal width = mStartItem->boundingRect().width()/2;
+         qreal height = mStartItem->boundingRect().height()/2;
+
+         return QRectF(p1, QSizeF(width, height))
+                 .normalized()
+                 .adjusted(-extra, -extra, extra, extra);
+    }
+     return QRectF(p1, QSizeF(p2.x() - p1.x(),
+                                       p2.y() - p1.y()))
+             .normalized()
+             .adjusted(-extra, -extra, extra, extra);
+ }
+
+ void Arc::updatePosition()
+ {
+     update(boundingRect());
+     //QLineF line(mapFromItem(myStartItem, 0, 0), mapFromItem(myEndItem, 0, 0));
+     //setLine(line);
+ }
+
+ void Arc::paint(QPainter *painter, const QStyleOptionGraphicsItem *,
+           QWidget *)
+ {
+        painter->save();
+
+          painter->setPen(mPen);
+
+          QPointF startPos(mStartItem->pos());
+
+          startPos.setX(startPos.x() + mStartItem->boundingRect().width()/2 - 4);
+          startPos.setY(startPos.y() + mStartItem->boundingRect().height()/2 - 4);
+
+          QPointF endPos(myEndItem->pos());
+          endPos.setX(endPos.x() + myEndItem->boundingRect().width()/2 - 4);
+          endPos.setY(endPos.y() + myEndItem->boundingRect().height()/2 - 4);
+
+          QLineF line(endPos, startPos);
+          setLine(line);
+
+          if(active) {
+                mPen.setDashOffset(dashOffset);
+                setZValue(999);
+          }
+          else
+              setZValue(0);
+
+          if(startPos == endPos) {
+              qreal width = mStartItem->boundingRect().width() /2;
+              qreal height = mStartItem->boundingRect().height() /2;
+
+                  //startPos.setX(startPos.x() - width);
+                  startPos.setY(startPos.y() + height);
+
+                  //setRect(startPos.x(), startPos.y(), width, height);
+
+                  painter->drawEllipse(startPos,
+                                       width,
+                                       height);
+          }
+          else
+            painter->drawLine(line);
+
+          double angle = ::acos(line.dx() / line.length());
+          if (line.dy() >= 0) angle = (Pi * 2) - angle;
+
+          QPainterPath path;
+          path.moveTo(endPos);
+          path.lineTo(endPos + QPointF(sin(angle + Pi / 3) * ArcSize,
+                                                cos(angle + Pi / 3) * ArcSize));
+
+          path.lineTo(endPos + QPointF(sin(angle + Pi - Pi / 3) * ArcSize,
+                                                cos(angle + Pi - Pi / 3) * ArcSize));
+
+
+          painter->setBrush(mPen.color());
+          painter->setPen(QPen(mPen.color(), 1, Qt::SolidLine));
+          painter->drawPath(path);
+
+         /*
+         if (isSelected()) {
+             painter->setPen(QPen(Qt::lightGray, 1, Qt::DashLine));
+         QLineF myLine = line();
+         myLine.translate(0, 4.0);
+         painter->drawLine(myLine);
+         myLine.translate(0,-8.0);
+         painter->drawLine(myLine);
+     }*/
+
+     painter->restore();
+ }
