@@ -26,8 +26,7 @@ SOURCES += main.cpp\
     ProfilerNode/agentudp/udp/udpreceiver.cpp \
     ProfilerNode/agentudp/udp/udpsender.cpp \
     ProfilerNode/agentudp/agentudp.cpp \
-    ProfilerNode/profilernode.cpp \
-    Manager/applicationmanager.cpp
+    ProfilerNode/profilernode.cpp
 
 HEADERS  += mini.h \
     udpsignal.h \
@@ -52,7 +51,6 @@ HEADERS  += mini.h \
     ProfilerNode/agentudp/networkproperties.h \
     ProfilerNode/agentudp/agentudp.h \
     ProfilerNode/profilernode.h \
-    Manager/applicationmanager.h \
     ProfilerNode/agentudp/request.h \
     ProfilerNode/agentudp/commander.h
 
