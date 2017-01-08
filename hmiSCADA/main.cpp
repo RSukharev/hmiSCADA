@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
   //QApplication::setGraphicsSystem("raster");
 #endif
 
-  Logger::filterLevel(Logger::LogLevel::Debug);
+  Logger::filterLevel(Logger::Debug);
   ConsoleAppender * consoleAppender = new ConsoleAppender();
   consoleAppender->setFormat("[%-5l] %t{HH:mm:ss.zzz} %F line: %i  <%C> %m\n");
   Logger::registerAppender(consoleAppender);

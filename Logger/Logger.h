@@ -21,6 +21,9 @@
 // Qt
 #include <QString>
 #include <QDebug>
+#ifndef assert
+#include <assert.h>
+#endif
 
 class QDateTime;
 

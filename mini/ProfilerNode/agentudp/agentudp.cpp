@@ -1,7 +1,6 @@
 #include "agentudp.h"
 
 #include "../../../Logger/ConsoleAppender.h"
-#include "../../Manager/applicationmanager.h"
 
 #include <QMessageBox>
 #include <QtConcurrentRun>

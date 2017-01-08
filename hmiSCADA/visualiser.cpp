@@ -304,7 +304,7 @@ void Visualiser::addNode(const Data & nodeData)
     }
 }
 
-#include "scene/figures/Arc.h"
+#include "scene/figures/arc.h"
 
 void Visualiser::addArc(const Data & arcData)
 {

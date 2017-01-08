@@ -54,7 +54,7 @@ public:
         if(!controllerInstance) {
             controllerInstance = new Controller();
             if(!controllerInstance) {
-                qFatal() << "Error: cannot create Controller";
+                qFatal("Error: cannot create Controller");
             }
         }
 

@@ -37,7 +37,7 @@ public:
         m_mutex.unlock();
     }
 
-    T at(int i) const {
+    T at(int i) {
         m_mutex.lock();
         T result = m_values.at(i);
         m_mutex.unlock();
