@@ -7,6 +7,7 @@
 #include <QGraphicsView>
 #include <QScrollBar>
 #include <QGraphicsView>
+#include <QCloseEvent>
 
 //#include "Logger/ConsoleAppender.h"
 
@@ -52,6 +53,12 @@ MainWidget::MainWidget(QWidget *parent) :
 
 }
 
+void MainWidget::closeEvent(QCloseEvent *event)
+  {
+        emit closeGUI();
+        event->accept();
+  }
+
 MainWidget::~MainWidget() {
     delete ui;
 }
@@ -75,7 +82,8 @@ void MainWidget::onAddModelName(const QString &name)
 
 void MainWidget::onSetLogMessages(const QString & mes)
 {
-    ui->textBrowser->setText(mes);
+    ui->textBrowser->append(mes);
+    //ui->textBrowser->setText(mes);
 }
 
 void MainWidget::onSetNodesCount(int count)

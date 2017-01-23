@@ -81,6 +81,9 @@ Controller::Controller(QObject *parent) :
     QObject::connect(this, SIGNAL(showMessage(QVariant)),
                               m_visualiser, SLOT(onShowLogMessage(QVariant)), Qt::QueuedConnection);
 
+    QObject::connect(m_visualiser, SIGNAL(destroyed(QObject *)),
+                              this, SLOT(onExit(QObject *)));
+
     // регистрация Visualiser в качестве плагина
     registerPlugin("Visualiser", m_visualiser);
 
@@ -91,6 +94,13 @@ Controller::Controller(QObject *parent) :
     pluginsLoader(ResourcePath::get()+"/plugins/");
 }
 
+void Controller::onExit(QObject *)
+{
+    qDebug() << "GUI closed, exiting...";
+    unregisterPlugin("Visualiser");
+    deleteLater();
+}
+
 Controller::~Controller()
 {
     qDebug() << "~Controller()";
@@ -98,15 +108,12 @@ Controller::~Controller()
     if(m_producer)
         m_producer->deleteLater();
 
-    if(m_visualiser)
-        m_visualiser->deleteLater();
-
     // удаление плагинов:
     QList<IPlugin *> pluginList = m_plugins.values();
-    while(!pluginList.isEmpty()) {
-        IPlugin * plugin = pluginList.back();
-        if(plugin != 0) delete plugin;
-        pluginList.removeAll(plugin);
+    while(!pluginList.isEmpty()) {    
+        QObject * plugin = dynamic_cast<QObject *>(pluginList.back());
+        if(plugin != 0) plugin->deleteLater();
+        pluginList.removeAll(pluginList.back());
     }
 }
 

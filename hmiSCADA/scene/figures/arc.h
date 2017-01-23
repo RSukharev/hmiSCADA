@@ -58,7 +58,7 @@
      void arcRemoved(Arc *);
 
  protected:
-     long long showTimeCounter;
+     long long m_showTimeCounter;
 
      QString name;
 

@@ -1,0 +1,1 @@
+Plugin_SysLog is qt-based plugin, library for getting logs from applications via syslog service. This plugin listen on 514 port of UDP protocol, parses log messages and sends the parsed data to plugin Visualiser.

@@ -86,3 +86,19 @@ hmiSCADA/plugins/testmodels/build-compmodel-qt560-Release/moc_imodel.cpp
 hmiSCADA/plugins/testmodels/build-compmodel-qt560-Release/moc_iobject.cpp
 
 *.dylib
+
+*.exe
+
+*.dll
+
+*.exp
+
+*.lib
+
+*.obj
+
+*.Debug
+
+*.Release
+
+*.manifest

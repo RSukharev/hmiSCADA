@@ -52,15 +52,15 @@ quint16 UdpReceiver::listen(const QString &address, quint16 initPort)
 
 quint16 UdpReceiver::getPort() const { return m_port; }
 
-void UdpReceiver::parseReceived(QByteArray receivedData) {
-
+void UdpReceiver::parseReceived(const QByteArray received) {
+/*
     QDataStream in(&receivedData, QIODevice::ReadOnly);
     in.setVersion(QDataStream::Qt_4_7);
 
     QVariant data;
     in >> data;
-
-    emit parsedData(data);
+*/
+    emit receivedBytes(received);
 }
 
 

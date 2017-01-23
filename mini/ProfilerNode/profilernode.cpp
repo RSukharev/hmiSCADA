@@ -36,6 +36,9 @@ void ProfilerNode::startTest(const TestData & testData) {
 
 
 void ProfilerNode::visualise(const Data & node) {
+
+    //qDebug() << qPrintable(node.toString());
+    ////////////////////////////////////////////
     m_agentUdp->addItem(node);
     Data flow = QVMGraph::simpleArc(m_parentNodeName, node["name"].toString());
     m_agentUdp->addItem(flow);
@@ -159,7 +162,9 @@ void ProfilerNode::showTestResult(const TestData &testResults) {
     //static long long parentEpochEndTime = getTimeNS();
     //long long childEpochTime = getTimeNS();
 
+    //////////////////////////////////////////////////////
     instance->m_agentUdp->addItem(childNode);
+    // qDebug() << qPrintable(childNode.toString());
 
     /*
 

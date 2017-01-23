@@ -24,11 +24,14 @@ Visualiser::Visualiser()
     // подключение слотов Visualiser-a
     QObject::connect(this, SIGNAL(runCommand(Data)), this, SLOT(onRunCommand(Data)), Qt::QueuedConnection);
     QObject::connect(this, SIGNAL(updateLog()), this, SLOT(onUpdateLog()), Qt::QueuedConnection);
+    QObject::connect(this, SIGNAL(setNodesCount(int)), mainWidget, SLOT(onSetNodesCount(int)));
+    QObject::connect(this, SIGNAL(setLogMessages(QString)), mainWidget, SLOT(onSetLogMessages(QString)), Qt::QueuedConnection);
+
     QObject::connect(mainWidget, SIGNAL(runModel(QString)), this, SLOT(onRunModel(QString)));
     QObject::connect(mainWidget, SIGNAL(changeModel(QString)), this, SLOT(onChangeModel(QString)));
     QObject::connect(mainWidget, SIGNAL(clearScene()), this, SLOT(onClearScene()));
     QObject::connect(mainWidget, SIGNAL(closeAllNodes()), this, SLOT(onCloseAllNodes()));
-    QObject::connect(this, SIGNAL(setNodesCount(int)), mainWidget, SLOT(onSetNodesCount(int)));
+    QObject::connect(mainWidget, SIGNAL(closeGUI()), this, SLOT(onCloseGUI()));
 
     scene = mainWidget->getScene();
     mainWidget->show();
@@ -212,8 +215,9 @@ void Visualiser::addNode(const Data & nodeData)
     //qDebug() << "node data:" << nodeData.toString();
 
     QString nodeName(nodeData["name"].toString());
+    QString parentNodeName(nodeData["parent"].toString());
 
-    if(!nodeName.isEmpty()) {
+    if(!nodeName.isEmpty()) {        
 
         Node * node = allNodes.getValue(nodeName);
         if(!node) {
@@ -233,9 +237,9 @@ void Visualiser::addNode(const Data & nodeData)
                 connect(node, SIGNAL(menuSignal(QString,QString)), this, SLOT(onMenuItemSelected(QString, QString)));
                 connect(node, SIGNAL(showNodeInfo(QString, QString)), this, SLOT(onShowNodeInfo(QString, QString)));
                 connect(node, SIGNAL(nodeRemoved(Node*)), this, SLOT(onNodeRemoved(Node*)));
+                connect(this, SIGNAL(animateItems()), node, SLOT(on_Animate()));
 
-                const QVariant & parentNodeName(nodeData["parent"]);
-                if(!parentNodeName.isValid()) {
+                if(!parentNodeName.isEmpty()) {
                       // получение родительского узла
                       Node * parentNode = allNodes.getValue(parentNodeName);
 
@@ -250,30 +254,34 @@ void Visualiser::addNode(const Data & nodeData)
         if(node) {
 
             // если у узла нет родителя
-            if(!node->hasParentNode()) {
-                QStringList nameParts = nodeName.split(".");
-                // если это не корневой узел
-                if(nameParts.size() > 1) {
-                    // получение корневого узла
-                    QString applicationNodeName = nameParts.value(0);
-                    Node * applicationNode = allNodes.getValue(applicationNodeName);
-                    // назначение корневого узла родительским
-                    if(applicationNode) {
-                        if(!applicationNode->hasChildNode())
-                            addArc(QVMGraph::simpleArc(applicationNodeName, nodeName));
+                        if(!node->hasParentNode()) {
+                            QStringList nameParts = nodeName.split(".");
+                            // если это не корневой узел
+                            if(nameParts.size() > 1) {
+                                // получение корневого узла
+                                QString applicationNodeName = nameParts.value(0);
+                                Node * applicationNode = allNodes.getValue(applicationNodeName);
+                                // назначение корневого узла родительским
+                                if(applicationNode) {
+                                    //if(!applicationNode->hasChildNode())
+                                       // addArc(QVMGraph::simpleArc(applicationNodeName, nodeName));
 
-                        node->setParentNode(applicationNode);
-                    }
-                }
-                else {
-                    // если узел корневой и у него нет наследников
-                    if(!node->hasChildNode()) {
-                        // добавление в список корневых узлов
-                        rootNodes.add(nodeName, node);
-                        setNodesPosition();
-                    }
-                }
-            }
+                                    node->setParentNode(applicationNode);
+                                    addArc(QVMGraph::simpleArc(node->getParentNodeName(), nodeName));
+                                }
+                            }
+                            else {
+                                // если узел корневой и у него нет наследников
+                                if(!node->hasChildNode()) {
+                                    // добавление в список корневых узлов
+                                    rootNodes.add(nodeName, node);
+                                    setNodesPosition();
+                                }
+                            }
+                        }
+
+            if(parentNodeName != nodeName)
+                addArc(QVMGraph::simpleArc(parentNodeName, nodeName));
 
             // добавление меню
             if(nodeData["menu"].canConvert<QStringList>()) {
@@ -284,16 +292,23 @@ void Visualiser::addNode(const Data & nodeData)
 
             // смена состояния узла
             QString nodeState(nodeData["nodeState"].toString());
-            if(nodeState == "on") node->setState(on);
+            if(nodeState == "on" ||
+               nodeState == "info" ||
+               nodeState == "warning" ||
+               nodeState == "notice" ||
+               nodeState == "debug") node->setState(on);
             else
-            if(nodeState == "error") node->setState(error);
+            if(nodeState == "err" || nodeState == "crit") node->setState(error);
             else
                node->setState(off);
 
             // добавление информации об узле
            // qDebug() << "add to node Info: " << nodeData["info"].toString();
 
-            QString nodeInfo(nodeData["info"].toString());
+            QString nodeInfo(nodeData
+                             //.toString());//
+                             ["info"].toString());
+
             if(!nodeInfo.isEmpty()) {
                 node->setProperty("info", nodeInfo);
                 // добавление подсказки
@@ -446,14 +461,17 @@ void Visualiser::onArcRemoved(Arc * arc)
     }
 }
 
-
 void Visualiser::onUpdateLog() {
 
-    if(!logMessages.isEmpty()) {
+    QString messages;
 
-        mainWidget->onSetLogMessages(logMessages);
-        logMessages.clear();
+    for(int i = 0; !logMessages.isEmpty() && (i < 1000); ++i) {
+         messages += logMessages.front() + "\n";
+         logMessages.pop_front();
     }
+
+    if(!messages.isEmpty())
+        emit setLogMessages(messages);
 }
 
 void Visualiser::timerEvent(QTimerEvent *event)
@@ -479,11 +497,10 @@ void Visualiser::timerEvent(QTimerEvent *event)
 void Visualiser::onShowLogMessage(const QVariant message)
 {
     QString msg(message.toString());
-    //qDebug() << message << "++++++++------=========--------++++++++++++++";
     if(!msg.isEmpty())
     {
         QDateTime localTime(QDateTime::currentDateTime());
-        logMessages = localTime.toString("hh:mm:ss dd.MM.yy") + "  " + msg + "\n" + logMessages;
+        logMessages.push_back(localTime.toString("hh:mm:ss dd.MM.yy") + "  " + msg);
     }
 }
 
@@ -575,6 +592,12 @@ void Visualiser::onCloseAllNodes()
         rp.value = "Shutdown";
         emit request(rp.toData());
     }
+}
+
+void Visualiser::onCloseGUI()
+{
+    qDebug() << "main widget closed, exiting...";
+    deleteLater();
 }
 
 void Visualiser::on_comboBox_currentIndexChanged(const QString & modelName)

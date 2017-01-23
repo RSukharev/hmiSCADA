@@ -58,8 +58,8 @@
  {
      if(m_isActive) {
 
-         if(showTimeCounter > 0) {
-             --showTimeCounter;
+         if(m_showTimeCounter > 0) {
+             --m_showTimeCounter;
 
              if(m_dashOffset < 6) m_dashOffset += 0.5;
              else m_dashOffset = 0;
@@ -75,7 +75,7 @@
  void Arc::on_QueryArc(const QString arcName, long showTime) {
 
      if(arcName == name) {
-         showTimeCounter = 1 + showTime;
+         m_showTimeCounter = 1 + showTime;
          setActive(true);
      }
  }

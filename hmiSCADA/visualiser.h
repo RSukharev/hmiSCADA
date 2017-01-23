@@ -157,6 +157,7 @@ signals:
     ///
     void setNodesCount(int);
 
+    void setLogMessages(const QString);
 
     ////////////////////////////////////////////////////////////////////
 
@@ -320,6 +321,8 @@ private slots:
 
     void onCloseAllNodes();
 
+    void onCloseGUI();
+
 private:
     ////
     /// \brief addNode - добавление узла
@@ -392,7 +395,7 @@ private:
     ///
     QMap<QWidget *, Data> elementsGUI;
 
-    QString logMessages;
+    QStringList logMessages;
 
     MainWidget * mainWidget;
     void registerCommands();

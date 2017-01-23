@@ -9,12 +9,12 @@
 #endif
 
 Node::Node(const QString & nodeName):
+    m_showTimeCounter (1),
     m_parentNode(0),
     m_childNode(0),
     m_nodeState(on),
     m_name(nodeName),
-    m_changeDirection(false),
-    m_isTopNode(true)
+    m_changeDirection(false)
 {
     // добавление подписи
     QString visibleNodeName(nodeName);
@@ -28,7 +28,6 @@ Node::Node(const QString & nodeName):
         visibleNodeName = visibleNameParts.join(".");
     }
     new QGraphicsSimpleTextItem(visibleNodeName, this);
-    m_isTopNode = !m_name.contains(".");
     setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemIsSelectable);
 }
 
@@ -45,7 +44,7 @@ Node::~Node()
 bool Node::isChildOf(Node * node) {
     //qDebug() << "node:" << node << "parentNode:" << parentNode;
     return ((node != Q_NULLPTR) && (m_parentNode != Q_NULLPTR) &&
-               ((m_parentNode == node) || m_parentNode->isChildOf(node)));
+            ((m_parentNode == node) || m_parentNode->isChildOf(node)));
 }
 
 void Node::setChildNodePosition() {
@@ -59,7 +58,7 @@ void Node::setChildNodePosition() {
         qreal xParent = pos().x();
         qreal yParent = pos().y();
 
-        if(!m_parentNode) {
+        if(m_parentNode == 0) {
             xParent -= dx / 2 - m_width/2;
             yParent += m_height - dy / 2;
         }
@@ -106,8 +105,21 @@ QStringList Node::getMenu()
     return m_menuItems;
 }
 
+void Node::on_Animate()
+{
+    if(m_nodeState == on) {
+
+        if(m_showTimeCounter > 0) {
+            --m_showTimeCounter;
+        }
+        else
+            setState(off);
+    }
+}
+
 void Node::setState(NodeState state) {
     if(m_pixmapFrames && (state < m_pixmapFrames->size())) {
+        m_showTimeCounter += 1;
         m_nodeState = state;
         refresh();
     }
@@ -117,8 +129,9 @@ NodeState Node::getState() const {
     return m_nodeState;
 }
 
-void Node::setChildNode(Node * child)
+Node * Node::setChildNode(Node * child)
 {
+    Node * delegateParent = this;
     if(child && (m_childNode == 0)) {
         m_childNode = child;
         child->m_changeDirection = !m_changeDirection;
@@ -126,19 +139,20 @@ void Node::setChildNode(Node * child)
         connect(child, SIGNAL(nodeRemoved(Node*)), this, SLOT(removeChildNode(Node*)));
         setChildNodePosition();
     }
-    else
-        m_childNode->setChildNode(child);
+    else {
+        delegateParent = m_childNode->setChildNode(child);
+    }
         //qDebug() << "Error: cannot add child to node " << name << " child is null";
+    return  delegateParent;
 }
 
 void Node::setParentNode(Node * parent)
 {
-    if(parent && (m_parentNode == 0)) {
+    if(parent && (m_parentNode == 0) && parent != this ) {
         //qDebug() << "set parent node " << parent->name << " to " << name;
 
-        m_parentNode = parent;
+        m_parentNode = parent->setChildNode(this);;
         setParent(m_parentNode);
-        parent->setChildNode(this);
     }
     else
         qDebug() << "Error: cannot set parent for node " << m_name << " parent is null";
@@ -164,8 +178,17 @@ bool Node::hasChildNode()
     return (m_childNode != 0);
 }
 
-QString Node::getName() {
+QString Node::getName() const {
     return m_name;
+}
+
+QString Node::getParentNodeName() const
+{
+    QString parentNodeName;
+    if(m_parentNode != 0)
+        parentNodeName = m_parentNode->getName();
+
+    return parentNodeName;
 }
 
 QRectF Node::boundingRect() const {
@@ -217,10 +240,9 @@ void Node::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
     }
 }
 
-
 void Node::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
-    if(m_isTopNode)
+    if(m_parentNode == 0)
     {
         QPointF currentPos(this->pos());
         QPointF newPos(mapToScene(event->pos()));

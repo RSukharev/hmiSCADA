@@ -89,16 +89,15 @@ public:
     bool hasParentNode();
     bool hasChildNode();
 
-    QString getName();
+    QString getName() const;
+    QString getParentNodeName() const;
     QStringList getMenu();
 
     void setState(NodeState state);
 
     NodeState getState() const;
 
-
     bool isChildOf(Node *node);
-
 
 signals:
     ////
@@ -123,6 +122,9 @@ signals:
     ///
     void changeActiveState(bool);
 
+public slots:
+    void on_Animate();
+
 protected slots:
 
     ////
@@ -141,11 +143,13 @@ protected slots:
     void removeChildNode(Node * = 0);
 
 protected:
+    long long m_showTimeCounter;
 
     ///
-    /// \brief addChild добавление узла наследника
+    /// \brief setChildNode добавление узла наследника
+    /// \return Node * delegatePrent
     ///
-    void setChildNode(Node * = 0);
+    Node * setChildNode(Node * = 0);
 
     ///
     /// \brief setChildrenPosition - расстановка узлов наследников
@@ -198,8 +202,6 @@ protected:
     QString m_name;
 
     bool m_changeDirection;
-
-    bool m_isTopNode;
 
 };
 

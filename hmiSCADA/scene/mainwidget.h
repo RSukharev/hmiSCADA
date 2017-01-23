@@ -26,6 +26,7 @@ signals:
     void changeModel(const QString modelName);
     void clearScene();
     void closeAllNodes();
+    void closeGUI();
 
 public slots:
     void onAddElementGUI(QWidget *widget);
@@ -51,6 +52,8 @@ private slots:
     void on_pbClear_released();
 
     void on_pushButton_released();
+
+    void closeEvent(QCloseEvent *event);
 
 private:
     ////

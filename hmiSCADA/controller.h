@@ -76,6 +76,9 @@ signals:
     ///
     void showMessage(const QVariant msg);
 
+private slots:
+    void onExit(QObject *);
+
 private:
 
     ////
