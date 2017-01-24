@@ -23,7 +23,6 @@ Visualiser::Visualiser()
 
     // подключение слотов Visualiser-a
     QObject::connect(this, SIGNAL(runCommand(Data)), this, SLOT(onRunCommand(Data)), Qt::QueuedConnection);
-    QObject::connect(this, SIGNAL(updateLog()), this, SLOT(onUpdateLog()), Qt::QueuedConnection);
     QObject::connect(this, SIGNAL(setNodesCount(int)), mainWidget, SLOT(onSetNodesCount(int)));
     QObject::connect(this, SIGNAL(setLogMessages(QString)), mainWidget, SLOT(onSetLogMessages(QString)), Qt::QueuedConnection);
 
@@ -298,7 +297,9 @@ void Visualiser::addNode(const Data & nodeData)
                nodeState == "notice" ||
                nodeState == "debug") node->setState(on);
             else
-            if(nodeState == "err" || nodeState == "crit") node->setState(error);
+            if(nodeState == "err" ||
+               nodeState == "crit" ||
+               nodeState == "alert") node->setState(error);
             else
                node->setState(off);
 
@@ -381,7 +382,7 @@ void Visualiser::onAddItem(const QVariant data)
 
 void Visualiser::onAddNodeMenu(const QVariant data)
 {
-    qDebug() <<  data.toString();
+    //qDebug() <<  data.toString();
     Request rp;
     rp.fromData(data);
     const QString nodeName(rp.senderID.toString());
@@ -461,33 +462,10 @@ void Visualiser::onArcRemoved(Arc * arc)
     }
 }
 
-void Visualiser::onUpdateLog() {
-
-    QString messages;
-
-    for(int i = 0; !logMessages.isEmpty() && (i < 1000); ++i) {
-         messages += logMessages.front() + "\n";
-         logMessages.pop_front();
-    }
-
-    if(!messages.isEmpty())
-        emit setLogMessages(messages);
-}
-
 void Visualiser::timerEvent(QTimerEvent *event)
 {
     if (event->timerId() == timer.timerId()) {
         emit animateItems();
-
-        static int logTimeCounter = 0;
-
-        if(logTimeCounter < 5) {
-            ++logTimeCounter;
-        }
-        else {
-            logTimeCounter = 0;
-            emit updateLog();
-        }
 
     } else {
         QObject::timerEvent(event);
@@ -496,12 +474,7 @@ void Visualiser::timerEvent(QTimerEvent *event)
 
 void Visualiser::onShowLogMessage(const QVariant message)
 {
-    QString msg(message.toString());
-    if(!msg.isEmpty())
-    {
-        QDateTime localTime(QDateTime::currentDateTime());
-        logMessages.push_back(localTime.toString("hh:mm:ss dd.MM.yy") + "  " + msg);
-    }
+    emit setLogMessages(message.toString());
 }
 
 

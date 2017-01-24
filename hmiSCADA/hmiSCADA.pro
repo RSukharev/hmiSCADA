@@ -1,4 +1,4 @@
-QT       += core gui network concurrent
+QT       += core gui network sql concurrent
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 #qtHaveModule(opengl):
@@ -35,7 +35,8 @@ HEADERS += \
     producer.h \
     streamstring.h \
     scene/pixmapholder.h \
-    plugins/interfaces/imodel.h
+    plugins/interfaces/imodel.h \
+    logdb.h
 
 TEMPLATE = app
 

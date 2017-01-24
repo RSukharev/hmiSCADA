@@ -150,7 +150,6 @@ void Controller::pluginsLoader(const QString & pathForPlugins)
 
     // поиск плагинов
     foreach( const QString & pluginName, pluginsDir.entryList( QDir::Files ) ) {
-        showMessage("===========================================================");
 
         // загрузка плагина
         QPluginLoader loader( pluginsDir.absoluteFilePath( pluginName ) );
@@ -203,7 +202,6 @@ void Controller::pluginsLoader(const QString & pathForPlugins)
         else
             showMessage("Failed to load plugin: " + loader.errorString());
     }
-    showMessage("===========================================================");
     showMessage("end searching for plugins");
 }
 

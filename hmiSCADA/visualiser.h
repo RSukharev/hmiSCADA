@@ -148,11 +148,6 @@ signals:
     void queryArc(const QString arcName, long showTime);
 
     ///
-    /// \brief updateLog - сигнал для обновления логов
-    ///
-    void updateLog();
-
-    ///
     /// \brief setNodesCount
     ///
     void setNodesCount(int);
@@ -309,11 +304,6 @@ private slots:
     /// \brief onShowNodeInfo - слот отображения информации об узле
     ///
     void onShowNodeInfo(const QString &, const QString &);
-
-    ///
-    /// \brief onUpdateLog - слот обновления логов
-    ///
-    void onUpdateLog();
 
     void onRunModel(const QString &modelName);
 

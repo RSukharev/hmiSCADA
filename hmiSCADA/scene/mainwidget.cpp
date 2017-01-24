@@ -51,6 +51,30 @@ MainWidget::MainWidget(QWidget *parent) :
     //ui->cbNodeTemplates->addItems(PixmapFabric::nodeTemplateNames());
     ui->graphicsView->setFocus();
 
+    initLogTable();
+}
+
+void MainWidget::initLogTable() {
+
+    // Create the data model
+    model = new QSqlRelationalTableModel(ui->logTable);
+    model->setEditStrategy(QSqlTableModel::OnManualSubmit);
+    model->setTable("logs");
+
+    // Set the localized header captions
+    model->setHeaderData(0, Qt::Horizontal, tr("N"));
+    model->setHeaderData(1, Qt::Horizontal, tr("Log datetime"));
+    model->setHeaderData(2, Qt::Horizontal, tr("Info"));
+    model->setSort(0, Qt::DescendingOrder);
+
+    // Set the model and hide the ID column
+    ui->logTable->setModel(model);
+    //ui->logTable->hideColumn(0);
+
+    ui->logTable->setColumnWidth(0, 50);
+    ui->logTable->setColumnWidth(1, 180);
+    ui->logTable->verticalHeader()->hide();
+    ui->logTable->horizontalHeader()->setStretchLastSection(true);
 }
 
 void MainWidget::closeEvent(QCloseEvent *event)
@@ -80,10 +104,10 @@ void MainWidget::onAddModelName(const QString &name)
     ui->comboBox->addItem(name);
 }
 
-void MainWidget::onSetLogMessages(const QString & mes)
+void MainWidget::onSetLogMessages(const QString message)
 {
-    ui->textBrowser->append(mes);
-    //ui->textBrowser->setText(mes);
+    m_db.addLog(QDateTime::currentDateTime(), QString(message).replace("\n", "  "));
+    model->submitAll();
 }
 
 void MainWidget::onSetNodesCount(int count)

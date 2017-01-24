@@ -3,6 +3,8 @@
 
 #include <QWidget>
 
+#include "../logdb.h"
+
 #include "ui_mainwidget.h"
 
 namespace Ui {
@@ -32,7 +34,7 @@ public slots:
     void onAddElementGUI(QWidget *widget);
     void onAddModelName(const QString &name);
     void onSetSplitterSizes(const QList<int> sizes);
-    void onSetLogMessages(const QString &mes);
+    void onSetLogMessages(const QString message);
     void onSetNodesCount(int count);
 
 private slots:
@@ -56,6 +58,8 @@ private slots:
     void closeEvent(QCloseEvent *event);
 
 private:
+    void initLogTable();
+
     ////
     /// \brief ui - GUI, сгенерированый Creator-ом
     ///
@@ -67,6 +71,11 @@ private:
     /// \brief applicationWidget - виджет главного окна программы
     ///
     QWidget * m_applicationWidget;
+
+    QSqlRelationalTableModel *model;
+
+    LogDB m_db;
+
 };
 
 #endif // MAINWIDGET_H
