@@ -7,6 +7,7 @@
 #include <QDateTime>
 #include <QObject>
 
+// make node data from TestData
 Data ProfilerNode::testNode(const TestData & testData) {
     QString testName;
     testName += (testData.nodeInfo + ".").c_str();
@@ -20,45 +21,31 @@ Data ProfilerNode::testNode(const TestData & testData) {
     return testNode;
 }
 
+// show node when test started
 void ProfilerNode::startTest(const TestData & testData) {
 
+    // create test node
+    Data test_node = testNode(testData);
+    test_node["nodeState"] = "on";
+    test_node["info"] = "ProfilerNode started test block:  " + test_node["info"].toString();
+
+    // prepare to show
     ProfilerNode * instance = 0;
     if(!instance) {
         instance = getInstance(testData.nodeInfo);
         assert(instance);
     }
 
-    Data test = testNode(testData);
-    test["nodeState"] = "on";
-    test["info"] = "ProfilerNode started test block:  " + test["info"].toString();
-    instance->visualise(test);
-}
+    // show node
+    instance->m_agentUdp->addItem(test_node);
+    QString nodeName = test_node["name"].toString();
 
+    // show flow
+    Data flow = QVMGraph::simpleArc(instance->m_parentNodeName, nodeName);
+    instance->m_agentUdp->addItem(flow);
 
-void ProfilerNode::visualise(const Data & node) {
-
-    //qDebug() << qPrintable(node.toString());
-    ////////////////////////////////////////////
-    m_agentUdp->addItem(node);
-    Data flow = QVMGraph::simpleArc(m_parentNodeName, node["name"].toString());
-    m_agentUdp->addItem(flow);
-    m_parentNodeName = node["name"].toString();
-}
-
-void ProfilerNode::stopTest(const TestData & testData) {
-
-    ProfilerNode * instance = 0;
-    if(!instance) {
-        instance = getInstance(testData.nodeInfo);
-        assert(instance);
-    }
-
-    Data test = testNode(testData);
-    test["nodeState"] = "pause";
-    //instance->agentUdp->addItem(test);
-
-    // отображение результатов профилирования
-    showTestResult(testData);
+    // set new parent node
+    instance->m_parentNodeName = nodeName;
 }
 
 void ProfilerNode::shutdown() {
@@ -70,7 +57,8 @@ void ProfilerNode::onExitSignal()
     m_agentUdp->removeMe();
 }
 
-void ProfilerNode::showTestResult(const TestData &testResults) {
+// show node when test finished
+void ProfilerNode::stopTest(const TestData &testResults) {
 
     long long testEndTime = getTimeNS();
 
@@ -80,7 +68,6 @@ void ProfilerNode::showTestResult(const TestData &testResults) {
     childName += testResults.testInfo.c_str();
 
     QString info("Test block:");
-    //info += testResults.testInfo.c_str();
     info += QString("\nNode: ") + testResults.nodeInfo.c_str();
     info += QString("\nModule: ") + testResults.moduleInfo.c_str();
 
@@ -113,6 +100,8 @@ void ProfilerNode::showTestResult(const TestData &testResults) {
                     testResults.testBlock.c_str();
     }
 
+    long int jobTime = testResults.stopTime - testResults.startTime;
+
     if(testResults.testDataType == tracePoint) {
 
         int currentPoint = testResults.endLineNumber + 1;
@@ -140,56 +129,36 @@ void ProfilerNode::showTestResult(const TestData &testResults) {
                 childName += lineNumber;
         }
 
-        info += QString("\nJob time: ") +
-        QString::number(testResults.stopTime - testResults.startTime) + " ms";
+        info += QString("\nJob time: ") + QString::number(jobTime) + " ms";
     }
 
+    // prepare to show
     static ProfilerNode * instance = 0;
-    if(!instance) {
+    if(!instance)
         instance = getInstance(testResults.nodeInfo);
-        //instance->parentNodeName = testResults.nodeInfo.c_str();
-    }
+
      assert(instance);
 
-     //qDebug() << "child:" << childName << " parent:" << instance->parentNodeName << " Info:" << qPrintable(info) ;
+    // create test node
+    Data test_node = instance->m_agentUdp->createChild(instance->m_parentNodeName, childName);
+    test_node["info"] = info;
+    test_node["testEndTime"] = static_cast<long long>(testEndTime);
+    test_node["parentTestEndTime"] = instance->m_parentTestEndTime;
 
-    Data childNode = instance->m_agentUdp->createChild(instance->m_parentNodeName, childName);
-    //info = "Parent:" + parentNodeName + "\n" + info;
-    childNode["info"] = info;
-    childNode["testEndTime"] = static_cast<long long>(testEndTime);
-    childNode["parentTestEndTime"] = instance->m_parentTestEndTime;
+    // set node state, based on job time
+    if(jobTime < 300)
+        test_node["nodeState"] = "on";
+    else
+        test_node["nodeState"] = "err";
 
-    //static long long parentEpochEndTime = getTimeNS();
-    //long long childEpochTime = getTimeNS();
-
-    //////////////////////////////////////////////////////
-    instance->m_agentUdp->addItem(childNode);
-    // qDebug() << qPrintable(childNode.toString());
-
-    /*
-
-    Data flow = QVMGraph::simpleArc(instance->parentNodeName, childName);
-    long long deltaTime = childEpochTime-parentEpochEndTime;
-
-    flow["info"] = instance->parentNodeName + "->" + childName +  " time:" + QString::number(deltaTime) + " ms";
-
-    deltaTime = (testResults.stopTime - testResults.startTime)/1000000;
-    if(deltaTime < 3) deltaTime = 3;
-
-    flow["showTimeCounter"] = deltaTime;
-    //instance->agentUdp->addItem(flow);
-
-    instance->parentNodeName = childName;
-    instance->parentTestEndTime = testEndTime;
-
-    parentEpochEndTime = childEpochTime;
-*/
+    // show node
+    instance->m_agentUdp->addItem(test_node);
 }
 
 ProfilerNode::ProfilerNode(const std::string &nodeName)  :
     m_agentUdp(0)
 {
-    qDebug() << "node " << nodeName.c_str() << " created";
+    //qDebug() << "node " << nodeName.c_str() << " created";
 
     m_applicationNode = QVMGraph::simpleNode(nodeName.c_str(), "PC");
     m_applicationNode["info"] = ("Node of distributed application \"" + nodeName + "\"").c_str();

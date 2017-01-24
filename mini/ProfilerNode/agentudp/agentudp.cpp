@@ -107,7 +107,7 @@ void AgentUdp::timerEvent(QTimerEvent *event)
 
 void AgentUdp::setMenu() {
     m_agentNode["menu"] = m_commander.getCommands();
-    qDebug() << qPrintable(m_agentNode.toString());
+    //qDebug() << qPrintable(m_agentNode.toString());
 }
 
 void AgentUdp::processData(const QVariant &data) {

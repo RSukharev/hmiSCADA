@@ -10,7 +10,6 @@ class ProfilerNode : public QObject
     Q_OBJECT
 
 public:
-    static void showTestResult(const TestData & testResults);
     static void startTest(const TestData &data);
     static void stopTest(const TestData &data);
     static void shutdown();
@@ -19,7 +18,6 @@ private slots:
     void onExitSignal();
 
 private:
-    void visualise(const Data &node);
     static Data testNode(const TestData &testData);
 
     ProfilerNode(const std::string & name);
