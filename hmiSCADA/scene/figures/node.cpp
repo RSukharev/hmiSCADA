@@ -119,7 +119,7 @@ void Node::on_Animate()
 
 void Node::setState(NodeState state) {
     if(m_pixmapFrames && (state < m_pixmapFrames->size())) {
-        m_showTimeCounter += 1;
+        m_showTimeCounter = 1;
         m_nodeState = state;
         refresh();
     }

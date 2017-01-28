@@ -200,7 +200,7 @@ void Controller::pluginsLoader(const QString & pathForPlugins)
             }
         }
         else
-            showMessage("Failed to load plugin: " + loader.errorString());
+           qDebug() << "Failed to load plugin: " << loader.errorString();
     }
     showMessage("end searching for plugins");
 }
