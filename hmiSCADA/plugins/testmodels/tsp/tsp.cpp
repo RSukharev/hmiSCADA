@@ -225,7 +225,7 @@ void TSP::concurrentRun() {
     int crossPoint = rand()%m_genesQuantity;
     showMessage("cross point number:" + QString::number(crossPoint));
 
-    bool solutionFound = false;
+    bool chromosomesAreEqual = false;
     int generationNum = 0;
 
     // build new generations
@@ -293,7 +293,7 @@ void TSP::concurrentRun() {
 
         if(equalCount == m_chromosomesQuantity) {
 
-            solutionFound = true;
+            chromosomesAreEqual = true;
             break;
         }
 
@@ -315,8 +315,8 @@ void TSP::concurrentRun() {
         showMessage("chromosome N" + QString::number(i) + ": " + genes);
     }
 
-    if(solutionFound)
-        showMessage("solution found at " + QString::number(generationNum+1) + " generation");
+    if(chromosomesAreEqual)
+        showMessage("Chromosomes are equal at " + QString::number(generationNum+1) + " generation");
     else
         showMessage("Error: solution not found!");
 }
@@ -484,7 +484,7 @@ QVMGraph TSP::buildGraph(const QVector<int> & U_weightMatrix) {
 }
 
 QString TSP::getNodeName(int i) {
-    return "N"+QString::number(i);
+    return "Node_"+QString::number(i);
 }
 
 QVector<int> TSP::generateRandomSolution(int vertexCount)
