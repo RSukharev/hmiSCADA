@@ -9,25 +9,21 @@ bin/mini.app/Contents/PkgInfo
 
 bin/mini.app/Contents/Resources/empty.lproj
 
-build-hmiSCADA*Release*
-
-build-hmiSCADA*Debug*
-
 *.pro.user*
 
 *.o
 
-build-mini*Release*
+build-*Release*
 
-build-mini*Debug*
+build-*Debug*
 
-hmiSCADA/plugins/build-plugin_udp*Release*
+hmiSCADA/plugins/build-*Release*
 
-hmiSCADA/plugins/build-plugin_udp*Debug*
+hmiSCADA/plugins/build-*Debug*
 
-hmiSCADA/plugins/testmodels/build-compmodel*Release*
+hmiSCADA/plugins/testmodels/build-*Release*
 
-hmiSCADA/plugins/testmodels/build-compmodel*Debug*
+hmiSCADA/plugins/testmodels/build-*Debug*
 
 *.dylib
 
