@@ -69,7 +69,7 @@ public slots:
 
        //qDebug() << "visualiser thread:" << this->thread();
        //qDebug() << qPrintable(data.toString());
-       commander.run(this, data["command"], data["value"]);
+       m_commander.run(this, data["command"], data["value"]);
     }
 
 signals:
@@ -197,12 +197,17 @@ signals:
     ///
     void addNodeMenu(const Data data);
 
+    ///
+    /// \brief setWindowState сигнал для изменения размера окна
+    ///
+    void setWindowState(Qt::WindowState);
+
 public slots:
     ////
     /// \brief onAddElementGUI - слот добавления элемента графического управления
     /// \param data - данные элемента управления
     ///
-    void onAddElementGUI(const QVariant data);
+    void onAddElementGUI(const Data data);
 
     ////
     /// \brief onAddModelName - слот добавления в отображение названия модели подключаемого плагина
@@ -346,53 +351,51 @@ private:
     ////
     /// \brief scene - графическая сцена
     ///
-    QGraphicsScene *scene;
+    QGraphicsScene *m_scene;
 
     ////
     /// \brief timer - таймер для анимации объектов сцены
     ///
-    QBasicTimer timer;
+    QBasicTimer m_timer;
 
     ////
     /// \brief nodesList - список узлов
     ///
-    ObjectMap<Node*> allNodes;
+    ObjectMap<Node*> m_allNodes;
 
-    ObjectMap<Node*> rootNodes;
+    ObjectMap<Node*> m_rootNodes;
 
     ////
     /// \brief ArcList - список потоков
     ///
-    ObjectMap<Arc*> arcList;
+    ObjectMap<Arc*> m_arcList;
 
     ////
     /// \brief applicationWidget - виджет главного окна программы
     ///
-    QWidget * applicationWidget;
+    QWidget * m_applicationWidget;
 
     ////
     /// \brief radius - радиус для выстраивания узлов
     ///
-    int radius;
+    int m_radius;
 
     ////
     /// \brief visualiseProperties - набор параметров визуализации
     ///
-    GUI_VisualiseProperties visualiseProperties;
+    GUI_VisualiseProperties m_visualiseProperties;
 
     ////
     /// \brief elementsGUI - набор элементов графического интерфейса управления
     ///
-    QMap<QWidget *, Data> elementsGUI;
+    QMap<QWidget *, Data> m_elementsGUI;
 
-    QStringList logMessages;
-
-    MainWidget * mainWidget;
+    MainWidget * m_mainWidget;
     void registerCommands();
 
-    Commander<Visualiser, const QVariant> commander;
-    Commander<Visualiser, const Data &> addItemCommander;
-    Commander<Visualiser, const Data &> removeItemCommander;
+    Commander<Visualiser, const QVariant> m_commander;
+    Commander<Visualiser, const Data &> m_addItemCommander;
+    Commander<Visualiser, const Data &> m_removeItemCommander;
 };
 
 #endif // VISUALISER_H

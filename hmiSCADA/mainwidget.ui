@@ -73,7 +73,7 @@
       </property>
       <property name="maximumSize">
        <size>
-        <width>150</width>
+        <width>170</width>
         <height>16777215</height>
        </size>
       </property>
@@ -97,7 +97,7 @@
         <number>0</number>
        </property>
        <item>
-        <widget class="QGroupBox" name="groupBox_3">
+        <widget class="QGroupBox" name="modelList">
          <property name="minimumSize">
           <size>
            <width>0</width>
@@ -105,7 +105,7 @@
           </size>
          </property>
          <property name="title">
-          <string>Models list</string>
+          <string>Model list</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_3">
           <property name="spacing">
@@ -150,7 +150,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="groupBox_2">
+        <widget class="QGroupBox" name="viewOptions">
          <property name="minimumSize">
           <size>
            <width>0</width>
@@ -218,6 +218,26 @@
            </spacer>
           </item>
          </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="modelOptions">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="baseSize">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="title">
+          <string>Model Options</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_4"/>
         </widget>
        </item>
       </layout>

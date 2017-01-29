@@ -144,9 +144,23 @@ public:
     /// \brief insertArc - добавление в граф дуги узла from в узел to
     /// \param from - название исходящей вершины дуги
     /// \param to - название входящей вершины дуги
-    /// \param arc - парамеры дуги
     ///
-    void insertArc(const QString & from, const QString & to, const Data & arc = Data()) {
+    void insertArc(const QString & from, const QString & to) {
+
+        if(!(m_nodes[from].isNull() || m_nodes[to].isNull())) {
+            m_arcs.insert(arcName(from, to), simpleArc(from, to));
+        }
+    }
+
+    ////
+    /// \brief insertArc - добавление в граф дуги узла from в узел to
+    /// \param arc - дуга
+    ///
+    void insertArc(const Data & arc) {
+
+        QStringList nodeNames = arcNodeNames(arc);
+        QString from(nodeNames.at(0)), to(nodeNames.at(1));
+
         if(!(m_nodes[from].isNull() || m_nodes[to].isNull())) {
             m_arcs.insert(arcName(from, to), arc);
         }

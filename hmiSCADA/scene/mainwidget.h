@@ -23,6 +23,8 @@ public:
     ~MainWidget();
     QGraphicsScene * getScene() { return m_scene; }
 
+    void setModelOptionsHidden(bool state);
+
 signals:
     void runModel(const QString modelName);
     void changeModel(const QString modelName);
@@ -36,6 +38,7 @@ public slots:
     void onSetSplitterSizes(const QList<int> sizes);
     void onSetLogMessages(const QString message);
     void onSetNodesCount(int count);
+    void onSetWindowState(Qt::WindowState state);
 
 private slots:
     ////

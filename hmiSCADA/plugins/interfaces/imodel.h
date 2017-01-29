@@ -109,14 +109,14 @@ protected:
     /// \brief parametersForVisualise - базовые параметры запроса на визуализацию
     /// \return
     ///
-    virtual Request & parametersForVisualise() {
+    virtual Request parametersForVisualise() const {
 
-        static Request defaultParameters;
-        if(defaultParameters.senderID.isNull()) {
-            defaultParameters.senderID = getID();
-            defaultParameters.receiverID = "Visualiser";
-        }
-        return defaultParameters;
+        Request parameters;
+
+        parameters.senderID = getID();
+        parameters.receiverID = "Visualiser";
+
+        return parameters;
     }
 };
 

@@ -54,14 +54,14 @@ private:
     // запуск модели
     void run(const QVariant);
 
-    // граф, содержащий моделируемые устройства и связи между ними
-    QVMGraph graph;
-
     Data createChildNode(const QString &parentName, const QString &childName, const QString &style = "");
 
     void addChildren(const QString &nodeName, int childrenCount);
 
     Commander<CompModel, const QVariant> m_commander;
+
+    // граф, содержащий моделируемые устройства и связи между ними
+    QVMGraph m_graph;
 
 };
 

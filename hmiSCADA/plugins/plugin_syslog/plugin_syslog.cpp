@@ -63,6 +63,7 @@ void Plugin_SysLog::registerCommands()
 {
     QObject::connect(this, SIGNAL(dataReceived(Data)), this, SLOT(onRunCommand(Data)));
 
+    m_commander.setClassID(getID());
     m_commander.registerCommand("Run", &Plugin_SysLog::run);
     m_commander.registerCommand("Shutdown", &Plugin_SysLog::onClearScene);
     //    m_commander.registerCommand("MenuItemSelected", &Plugin_SysLog::onMenuItemSelected);

@@ -341,6 +341,12 @@ private:
     QString id;
 };
 
+struct GUI_ElementList : public Data {
+    void add(Data data) {
+        insert(QString::number(keys().size()), data);
+    }
+};
+
 /*!
     \brief GUI_ElementProperties - Структура для построения графического элемента интерфейса
     \author Roman Sukharev

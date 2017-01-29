@@ -54,6 +54,10 @@ MainWidget::MainWidget(QWidget *parent) :
     initLogTable();
 }
 
+void MainWidget::setModelOptionsHidden(bool state) {
+    ui->modelOptions->setHidden(state);
+}
+
 void MainWidget::initLogTable() {
 
     // Create the data model
@@ -93,8 +97,12 @@ QString MainWidget::getCurrentModel() {
 
 void MainWidget::onAddElementGUI(QWidget * widget)
 {
+    qDebug() << "add element gui";
     if(widget) {
-        ui->groupBox->layout()->addWidget(widget);
+        if(ui->modelOptions->isHidden())
+            ui->modelOptions->setHidden(false);
+
+        ui->modelOptions->layout()->addWidget(widget);
         widget->show();
     }
 }
@@ -113,6 +121,11 @@ void MainWidget::onSetLogMessages(const QString message)
 void MainWidget::onSetNodesCount(int count)
 {
     ui->lineEdit->setText(QString::number(count));
+}
+
+void MainWidget::onSetWindowState(Qt::WindowState state)
+{
+    setWindowState(state);
 }
 
 void MainWidget::onSetSplitterSizes(const QList<int> sizes)

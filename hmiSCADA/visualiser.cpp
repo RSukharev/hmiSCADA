@@ -19,25 +19,26 @@
 
 Visualiser::Visualiser()
 {
-    mainWidget = new MainWidget;
+    m_mainWidget = new MainWidget;
 
     // подключение слотов Visualiser-a
     QObject::connect(this, SIGNAL(runCommand(Data)), this, SLOT(onRunCommand(Data)), Qt::QueuedConnection);
-    QObject::connect(this, SIGNAL(setNodesCount(int)), mainWidget, SLOT(onSetNodesCount(int)));
-    QObject::connect(this, SIGNAL(setLogMessages(QString)), mainWidget, SLOT(onSetLogMessages(QString)), Qt::QueuedConnection);
+    QObject::connect(this, SIGNAL(setNodesCount(int)), m_mainWidget, SLOT(onSetNodesCount(int)));
+    QObject::connect(this, SIGNAL(setLogMessages(QString)), m_mainWidget, SLOT(onSetLogMessages(QString)), Qt::QueuedConnection);
+    QObject::connect(this, SIGNAL(setWindowState(Qt::WindowState)), m_mainWidget, SLOT(onSetWindowState(Qt::WindowState)));
 
-    QObject::connect(mainWidget, SIGNAL(runModel(QString)), this, SLOT(onRunModel(QString)));
-    QObject::connect(mainWidget, SIGNAL(changeModel(QString)), this, SLOT(onChangeModel(QString)));
-    QObject::connect(mainWidget, SIGNAL(clearScene()), this, SLOT(onClearScene()));
-    QObject::connect(mainWidget, SIGNAL(closeAllNodes()), this, SLOT(onCloseAllNodes()));
-    QObject::connect(mainWidget, SIGNAL(closeGUI()), this, SLOT(onCloseGUI()));
+    QObject::connect(m_mainWidget, SIGNAL(runModel(QString)), this, SLOT(onRunModel(QString)));
+    QObject::connect(m_mainWidget, SIGNAL(changeModel(QString)), this, SLOT(onChangeModel(QString)));
+    QObject::connect(m_mainWidget, SIGNAL(clearScene()), this, SLOT(onClearScene()));
+    QObject::connect(m_mainWidget, SIGNAL(closeAllNodes()), this, SLOT(onCloseAllNodes()));
+    QObject::connect(m_mainWidget, SIGNAL(closeGUI()), this, SLOT(onCloseGUI()));
 
-    scene = mainWidget->getScene();
-    mainWidget->show();
+    m_scene = m_mainWidget->getScene();
+    m_mainWidget->show();
 
     registerCommands();
 
-    timer.start(300, this);
+    m_timer.start(300, this);
 }
 
 Visualiser::~Visualiser()
@@ -52,18 +53,19 @@ QString Visualiser::aboutInfo() const
 
 void Visualiser::registerCommands()
 {
-    commander.registerCommand("showLogMessage", &Visualiser::onShowLogMessage);
-    commander.registerCommand("addItem", &Visualiser::onAddItem);
-    commander.registerCommand("removeItem", &Visualiser::onRemoveItem);
-    commander.registerCommand("addNodeMenu", &Visualiser::onAddNodeMenu);
-    commander.registerCommand("setGUIproperties", &Visualiser::onSetGUIproperties);
-    commander.registerCommand("clearScene", &Visualiser::onClearScene);
-    commander.registerCommand("addModelNameToList", &Visualiser::onAddModelName);
-    commander.registerCommand("addElementGUI", &Visualiser::addElementGUI);
-    addItemCommander.registerCommand("node", &Visualiser::addNode);
-    addItemCommander.registerCommand("arc", &Visualiser::addArc);
-    removeItemCommander.registerCommand("node", &Visualiser::removeNode);
-    removeItemCommander.registerCommand("arc", &Visualiser::removeArc);
+    m_commander.setClassID(getID());
+    m_commander.registerCommand("showLogMessage", &Visualiser::onShowLogMessage);
+    m_commander.registerCommand("addItem", &Visualiser::onAddItem);
+    m_commander.registerCommand("removeItem", &Visualiser::onRemoveItem);
+    m_commander.registerCommand("addNodeMenu", &Visualiser::onAddNodeMenu);
+    m_commander.registerCommand("setGUIproperties", &Visualiser::onSetGUIproperties);
+    m_commander.registerCommand("clearScene", &Visualiser::onClearScene);
+    m_commander.registerCommand("addModelNameToList", &Visualiser::onAddModelName);
+    //m_commander.registerCommand("addElementGUI", &Visualiser::addElementGUI);
+    m_addItemCommander.registerCommand("node", &Visualiser::addNode);
+    m_addItemCommander.registerCommand("arc", &Visualiser::addArc);
+    m_removeItemCommander.registerCommand("node", &Visualiser::removeNode);
+    m_removeItemCommander.registerCommand("arc", &Visualiser::removeArc);
 }
 
 #include <QLineEdit>
@@ -72,9 +74,9 @@ void Visualiser::onSignalFromElementGUI() {
 
     Data data;
 
-    foreach (QWidget * widget, elementsGUI.keys()) {
+    foreach (QWidget * widget, m_elementsGUI.keys()) {
         GUI_ElementProperties ep;
-        ep.fromData(elementsGUI[widget]);
+        ep.fromData(m_elementsGUI[widget]);
 
         if(ep.widgetType == "LineEdit") {
             QLineEdit * lineEdit = dynamic_cast<QLineEdit*>(widget);
@@ -87,7 +89,7 @@ void Visualiser::onSignalFromElementGUI() {
 
     Request rp;
     rp.senderID = "Visualiser";
-    rp.receiverID = mainWidget->getCurrentModel();
+    rp.receiverID = m_mainWidget->getCurrentModel();
     rp.command = "SetData";
     rp.value = data;
 
@@ -107,82 +109,42 @@ void Visualiser::onMenuItemSelected(const QString & nodeName, const QString & me
     emit request(rp.toData());
 }
 
-void Visualiser::onAddElementGUI(const QVariant data)
-{
-    qDebug() << "GUI element data " << data;
-    GUI_ElementProperties ep;
-    ep.fromData(data);
-
-    QWidget * widget = 0;
-
-    if(ep.widgetType == "Label") {
-        QLabel * label = new QLabel;
-        label->setText(ep.value.toString());
-        widget = label;
-    }
-    else
-    if(ep.widgetType == "LineEdit") {
-        QLineEdit * lineEdit = new QLineEdit;
-        if(lineEdit) {
-            connect(lineEdit, SIGNAL(returnPressed()), this, SLOT(onSignalFromElementGUI()));
-            connect(lineEdit, SIGNAL(editingFinished()), this, SLOT(onSignalFromElementGUI()));
-            lineEdit->setText(ep.value.toString());
-            widget = lineEdit;
-        }
-    }
-    else
-    if(ep.widgetType == "PushButton") {
-        QPushButton * pushButton = new QPushButton;
-        if(pushButton) {
-            connect(pushButton, SIGNAL(released()), this, SLOT(onSignalFromElementGUI()));
-            pushButton->setText(ep.value.toString());
-            widget = pushButton;
-        }
-    }
-
-    if(widget) {
-        elementsGUI.insert(widget, data);
-        mainWidget->onAddElementGUI(widget);
-        widget->show();
-    }
-}
-
 void Visualiser::onClearScene(const QVariant )
 {    
-    arcList.clear();
-    rootNodes.clear();
-    allNodes.clear();
-    scene->clear();
+    m_arcList.clear();
+    m_rootNodes.clear();
+    m_allNodes.clear();
+    m_scene->clear();
 
-    QRectF rect(scene->sceneRect());
-    scene->update(rect);
+    QRectF rect(m_scene->sceneRect());
+    m_scene->update(rect);
 
-    radius = 150;
+    m_radius = 150;
 }
 
 void Visualiser::onRemoveElementsGUI()
 {
-    foreach (QWidget * widget, elementsGUI.keys()) {
+    foreach (QWidget * widget, m_elementsGUI.keys()) {
         delete widget;
     }
-    elementsGUI.clear();
+    m_elementsGUI.clear();
 }
 
 void Visualiser::onAddModelName(const QVariant data)
 {
-    mainWidget->onAddModelName(data.toString());
+    m_mainWidget->onAddModelName(data.toString());
 }
 
 void Visualiser::setNodesPosition() {
 
     //qDebug() << "place nodes";
 
-    QList<Node *> parentNodes(rootNodes.getValues());
+    QList<Node *> parentNodes(m_rootNodes.getValues());
     int parentsCount = parentNodes.size();
 
     emit setNodesCount(parentsCount);
 
-    radius =  qMax(radius, qMax(200, parentsCount * 8));
+    m_radius =  qMax(m_radius, qMax(200, parentsCount * 8));
 
     qreal angle = -6.282 / parentsCount;
 
@@ -196,8 +158,8 @@ void Visualiser::setNodesPosition() {
             Node * node = parentNodes[i];
 
             qreal nodeAngle = i * angle;
-            qreal x = radius * qCos(nodeAngle);
-            qreal y = radius * qSin(nodeAngle);
+            qreal x = m_radius * qCos(nodeAngle);
+            qreal y = m_radius * qSin(nodeAngle);
 
             qreal dx = x - node->x();
             qreal dy = y - node->y();
@@ -218,7 +180,7 @@ void Visualiser::addNode(const Data & nodeData)
 
     if(!nodeName.isEmpty()) {        
 
-        Node * node = allNodes.getValue(nodeName);
+        Node * node = m_allNodes.getValue(nodeName);
         if(!node) {
 
             node = new Node(nodeName);
@@ -231,7 +193,7 @@ void Visualiser::addNode(const Data & nodeData)
                 else
                     node->setPixmap(PixmapHolder::getPixmapFrames("defaultNode"));
 
-                node->addToScene(scene);
+                node->addToScene(m_scene);
 
                 connect(node, SIGNAL(menuSignal(QString,QString)), this, SLOT(onMenuItemSelected(QString, QString)));
                 connect(node, SIGNAL(showNodeInfo(QString, QString)), this, SLOT(onShowNodeInfo(QString, QString)));
@@ -240,13 +202,13 @@ void Visualiser::addNode(const Data & nodeData)
 
                 if(!parentNodeName.isEmpty()) {
                       // получение родительского узла
-                      Node * parentNode = allNodes.getValue(parentNodeName);
+                      Node * parentNode = m_allNodes.getValue(parentNodeName);
 
                       if(parentNode)
                            node->setParentNode(parentNode);
                 }
 
-                allNodes.add(nodeName, node);
+                m_allNodes.add(nodeName, node);
             }
         }
 
@@ -259,7 +221,7 @@ void Visualiser::addNode(const Data & nodeData)
                             if(nameParts.size() > 1) {
                                 // получение корневого узла
                                 QString applicationNodeName = nameParts.value(0);
-                                Node * applicationNode = allNodes.getValue(applicationNodeName);
+                                Node * applicationNode = m_allNodes.getValue(applicationNodeName);
                                 // назначение корневого узла родительским
                                 if(applicationNode) {
                                     //if(!applicationNode->hasChildNode())
@@ -273,7 +235,7 @@ void Visualiser::addNode(const Data & nodeData)
                                 // если узел корневой и у него нет наследников
                                 if(!node->hasChildNode()) {
                                     // добавление в список корневых узлов
-                                    rootNodes.add(nodeName, node);
+                                    m_rootNodes.add(nodeName, node);
                                     setNodesPosition();
                                 }
                             }
@@ -332,12 +294,12 @@ void Visualiser::addArc(const Data & arcData)
 
         QString arcName(QVMGraph::arcName(nodeFromName,nodeToName));
 
-        Arc * arc = arcList.getValue(arcName);
+        Arc * arc = m_arcList.getValue(arcName);
 
         if(!arc) {
 
-            Node * from = allNodes.getValue(nodeFromName);
-            Node * to = allNodes.getValue(nodeToName);
+            Node * from = m_allNodes.getValue(nodeFromName);
+            Node * to = m_allNodes.getValue(nodeToName);
 
             if(from && to) {
                 arc = new Arc(from, to);
@@ -347,7 +309,7 @@ void Visualiser::addArc(const Data & arcData)
                     connect(this, SIGNAL(animateItems()), arc, SLOT(on_Animate()));
                     connect(this, SIGNAL(queryArc(QString, long)), arc, SLOT(on_QueryArc(QString, long)));
 
-                    arcList.add(arcName, arc);
+                    m_arcList.add(arcName, arc);
                     //qDebug() << "new Arc created";
                 }
                 else
@@ -377,7 +339,7 @@ void Visualiser::addArc(const Data & arcData)
 void Visualiser::onAddItem(const QVariant data)
 {
     Data itemData(data);
-    addItemCommander.run(this, itemData["type"], itemData);
+    m_addItemCommander.run(this, itemData["type"], itemData);
 }
 
 void Visualiser::onAddNodeMenu(const QVariant data)
@@ -386,7 +348,7 @@ void Visualiser::onAddNodeMenu(const QVariant data)
     Request rp;
     rp.fromData(data);
     const QString nodeName(rp.senderID.toString());
-    Node *node = allNodes.getValue(nodeName);
+    Node *node = m_allNodes.getValue(nodeName);
     if(node) {
         QStringList menuItems(rp.value.toStringList());
         node->setMenu(menuItems);
@@ -394,7 +356,7 @@ void Visualiser::onAddNodeMenu(const QVariant data)
 }
 
 void Visualiser::removeNode(const Data & data) {
-    Node *node = allNodes.getValue(data["name"]);
+    Node *node = m_allNodes.getValue(data["name"]);
     if(node) {
         //qDebug() << "found " << node->getName() << ", deleting...";
         node->deleteLater();
@@ -411,7 +373,7 @@ void Visualiser::removeArc(const Data & data) {
 
         QString arcName(QVMGraph::arcName(nodeFromName,nodeToName));
 
-        Arc * arc = arcList.getValue(arcName);
+        Arc * arc = m_arcList.getValue(arcName);
         if(arc) {
             //qDebug() << "found " << arcName << ", deleting...";
             arc->deleteLater();
@@ -424,7 +386,7 @@ void Visualiser::onRemoveItem(const QVariant data)
     Data itemData(data);
     //qDebug() << itemData.toString();
 
-    if(removeItemCommander.run(this, itemData["type"], itemData))
+    if(m_removeItemCommander.run(this, itemData["type"], itemData))
         setNodesPosition();
 }
 
@@ -435,8 +397,8 @@ void Visualiser::onNodeRemoved(Node * node)
     if(node) {
         const QString nodeName(node->getName());
 
-        rootNodes.remove(node);
-        allNodes.remove(node);
+        m_rootNodes.remove(node);
+        m_allNodes.remove(node);
 
         qDebug() << nodeName << "node removed from rootNodes and allNodes";
 
@@ -455,7 +417,7 @@ void Visualiser::onArcRemoved(Arc * arc)
     if(arc) {
         QString arcName(arc->objectName());
 
-        arcList.remove(arcName);
+        m_arcList.remove(arcName);
         qDebug() << arcName << "removed from ArcList, emit signal...";
 
         emit arcRemoved(arcName);
@@ -464,7 +426,7 @@ void Visualiser::onArcRemoved(Arc * arc)
 
 void Visualiser::timerEvent(QTimerEvent *event)
 {
-    if (event->timerId() == timer.timerId()) {
+    if (event->timerId() == m_timer.timerId()) {
         emit animateItems();
 
     } else {
@@ -495,7 +457,7 @@ void Visualiser::onSetGUIproperties(const QVariant data)
     qDebug() << "setup GUI...";
 
     // настройка параметров визуализации
-    visualiseProperties.fromData(data);
+    m_visualiseProperties.fromData(data);
 
     // настройка параметров главного окна программы
     GUI_ApplicationProperties ga;
@@ -504,11 +466,11 @@ void Visualiser::onSetGUIproperties(const QVariant data)
     switch(ga.state) {
         case GUI_ApplicationProperties::maximize:
             qDebug() << "MAXIMIZE!";
-            applicationWidget->setWindowState(Qt::WindowMaximized);
+            emit setWindowState(Qt::WindowMaximized);
         break;
         case GUI_ApplicationProperties::minimize:
             qDebug() << "MINIMIZE!";
-            applicationWidget->setWindowState(Qt::WindowMinimized);
+            emit setWindowState(Qt::WindowMinimized);
         break;
         default:           
             break;
@@ -527,10 +489,56 @@ void Visualiser::onSetGUIproperties(const QVariant data)
         widgetSizes[0] = sp.mainScreenHeight;
         widgetSizes[1] = sp.bottomPanelHeight;
 
-        mainWidget->onSetSplitterSizes(widgetSizes.toList());
+        m_mainWidget->onSetSplitterSizes(widgetSizes.toList());
+    }
+    Data inputData(data);
+    Data elementsGUI = inputData["elementsGUI"];
+    //qDebug() << qPrintable(elementsGUI.toString());
+
+    foreach(const QString & key, elementsGUI.keys()) {
+        //qDebug() << key << elementsGUI[key];
+        onAddElementGUI(elementsGUI[key]);
     }
 }
+void Visualiser::onAddElementGUI(const Data data)
+{
+    qDebug() << "GUI element data " << qPrintable(data.toString());
+    GUI_ElementProperties ep;
+    ep.fromData(data);
 
+    QWidget * widget = 0;
+
+    if(ep.widgetType == "Label") {
+        QLabel * label = new QLabel;
+        label->setText(ep.value.toString());
+        widget = label;
+    }
+    else
+    if(ep.widgetType == "LineEdit") {
+        QLineEdit * lineEdit = new QLineEdit;
+        if(lineEdit) {
+            connect(lineEdit, SIGNAL(returnPressed()), this, SLOT(onSignalFromElementGUI()));
+            connect(lineEdit, SIGNAL(editingFinished()), this, SLOT(onSignalFromElementGUI()));
+            lineEdit->setText(ep.value.toString());
+            widget = lineEdit;
+        }
+    }
+    else
+    if(ep.widgetType == "PushButton") {
+        QPushButton * pushButton = new QPushButton;
+        if(pushButton) {
+            connect(pushButton, SIGNAL(released()), this, SLOT(onSignalFromElementGUI()));
+            pushButton->setText(ep.value.toString());
+            widget = pushButton;
+        }
+    }
+
+    if(widget) {
+        m_elementsGUI.insert(widget, data);
+        m_mainWidget->onAddElementGUI(widget);
+        widget->show();
+    }
+}
 void Visualiser::onRunModel(const QString & modelName)
 {
     Request requestParams;
@@ -544,6 +552,8 @@ void Visualiser::onRunModel(const QString & modelName)
 
 void Visualiser::onChangeModel(const QString & modelName)
 {
+    m_mainWidget->setModelOptionsHidden(true);
+
     Request requestParams;
     requestParams.receiverID = modelName;
     requestParams.senderID = "Visualiser";
@@ -556,7 +566,7 @@ void Visualiser::onChangeModel(const QString & modelName)
 
 void Visualiser::onCloseAllNodes()
 {
-    QList<QVariant> nodeNames(rootNodes.getKeys());
+    QList<QVariant> nodeNames(m_rootNodes.getKeys());
     foreach (const QVariant & nodeName, nodeNames) {
         Request rp;
         rp.senderID = "Visualiser";

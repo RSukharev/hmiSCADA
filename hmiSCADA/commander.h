@@ -72,6 +72,11 @@ public:
         Function() : function(0) {}
     };
 
+    // присвоение идентификатора класса
+    void setClassID(const QVariant id) {
+        m_classID = id;
+    }
+
     // регистрация команды
     void registerCommand(const QString command,
                             MemberFunction function,
@@ -96,7 +101,7 @@ public:
         if(function != 0)
             CALL_MEMBER_FN(object, function)(param);
         else
-            qDebug() << "not implemented yet:" << command;
+            qDebug() << m_classID << " has no command:" << command;
 
         return static_cast<bool>(function);
     }
@@ -109,6 +114,9 @@ public:
 private:
     // команды и функции
     QMap<QString, Function> m_functions;
+
+    // идентификатор класса
+    QVariant m_classID;
 };
 
 #endif // COMMANDER_H

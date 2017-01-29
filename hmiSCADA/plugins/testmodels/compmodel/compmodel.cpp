@@ -16,6 +16,7 @@ void CompModel::registerCommands()
 {
     QObject::connect(this, SIGNAL(dataReceived(Data)), this, SLOT(onRunCommand(Data)));
 
+    m_commander.setClassID(getID());
     m_commander.registerCommand("Run", &CompModel::run);
     m_commander.registerCommand("MenuItemSelected", &CompModel::onMenuItemSelected);
     m_commander.registerCommand("Shutdown", &CompModel::onClearScene);
@@ -27,7 +28,7 @@ void CompModel::onMenuItemSelected(const QVariant inputData)
     rp.fromData(inputData);
 
     if(rp.value.toString() == "info")
-       qDebug() << rp.receiverID << ":" << graph.getNode(rp.receiverID.toString()).value("info").toString();
+       qDebug() << rp.receiverID << ":" << m_graph.getNode(rp.receiverID.toString()).value("info").toString();
     else
        qDebug() << "process menu item:" << rp.value.toString();
 }
@@ -110,13 +111,13 @@ void CompModel::run(const QVariant)
     Data srv = QVMGraph::simpleNode("SRV", "PCcase");
     srv["info"] = "small business server, 16Gb RAM, 1Tb HDD, Gigabit ethernet";
 
-    graph.insertNode(srv);
+    m_graph.insertNode(srv);
     addItem(srv);
 
     Data db1 = QVMGraph::simpleNode("DB1", "DBnode");
     db1["info"] = "PostgreSQL server ver 8.0";
 
-    graph.insertNode(db1);
+    m_graph.insertNode(db1);
     addItem(db1);
 
     int number = 4;
@@ -126,7 +127,7 @@ void CompModel::run(const QVariant)
 
     for(int i = 0; i < number; ++i) {
         pc["name"] = QString("PC")+QString::number(i+1);
-        graph.insertNode(pc);
+        m_graph.insertNode(pc);
         addItem(pc);
     }
 
@@ -139,10 +140,10 @@ void CompModel::run(const QVariant)
                 QString from(QString("PC")+QString::number(i+1));
                 QString to(QString("PC") + QString::number(j+1));
 
-                graph.insertArc(from, to);
+                m_graph.insertArc(from, to);
                 addItem(QVMGraph::simpleArc(from, to));
 
-                graph.insertArc(to, from);
+                m_graph.insertArc(to, from);
                 addItem(QVMGraph::simpleArc(to, from));
 
                 Data link = QVMGraph::simpleArc("SRV", QString("PC")
